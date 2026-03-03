@@ -3,151 +3,163 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Grocery Cloud System - Full Version</title>
+<title>Ultimate Smart Grocery Management System</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 <style>
 body{font-family:Arial;margin:0;background:#f1f5f9}
-header{background:#0f172a;color:white;padding:15px;text-align:center}
-.container{max-width:1200px;margin:auto;padding:20px}
+header{background:#111827;color:white;padding:15px;text-align:center}
+.container{max-width:1300px;margin:auto;padding:20px}
 .card{background:white;padding:15px;border-radius:10px;margin-bottom:20px;box-shadow:0 4px 10px rgba(0,0,0,0.1)}
 input,select,button{padding:8px;margin:5px}
-button{background:#0f172a;color:white;border:none;border-radius:5px;cursor:pointer}
-button:hover{background:#1e293b}
+button{background:#111827;color:white;border:none;border-radius:5px;cursor:pointer}
+button:hover{background:#1f2937}
 table{width:100%;border-collapse:collapse;margin-top:10px}
 th,td{border:1px solid #ddd;padding:8px;text-align:center}
-th{background:#e2e8f0}
+th{background:#e5e7eb}
 .dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px}
 .stat{background:white;padding:15px;border-radius:10px;text-align:center;box-shadow:0 3px 8px rgba(0,0,0,0.1)}
 .low{color:red;font-weight:bold}
+.dark{background:#111827;color:white}
 </style>
 </head>
 <body>
-<header><h2>🛒 Smart Grocery SaaS System</h2></header>
-<div class="container">
+<header>
+<h2>🛒 Ultimate Grocery Store Software (Offline Pro Version)</h2>
+<button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
+</header>
 
-<!-- Login -->
-<div class="card">
-<h3>🔐 Login / Register</h3>
-<input type="email" id="email" placeholder="Email">
-<input type="password" id="password" placeholder="Password">
-<button onclick="register()">Register</button>
-<button onclick="login()">Login</button>
-<button onclick="logout()">Logout</button>
-</div>
+<div class="container">
 
 <!-- Dashboard -->
 <div class="dashboard">
 <div class="stat">Total Sales<br>₹<strong id="totalSales">0</strong></div>
-<div class="stat">Total Cost<br>₹<strong id="totalCost">0</strong></div>
-<div class="stat">Total Profit<br>₹<strong id="totalProfit">0</strong></div>
-<div class="stat">Low Stock Items<br><strong id="lowStockCount">0</strong></div>
+<div class="stat">Total Purchase<br>₹<strong id="totalPurchase">0</strong></div>
+<div class="stat">Total Expense<br>₹<strong id="totalExpense">0</strong></div>
+<div class="stat">Net Profit<br>₹<strong id="netProfit">0</strong></div>
+<div class="stat">Low Stock<br><strong id="lowStockCount">0</strong></div>
 </div>
 
-<!-- Product Management -->
+<!-- Product & Supplier Management -->
 <div class="card">
-<h3>📦 Add Product</h3>
+<h3>📦 Product Management</h3>
 <input type="text" id="pname" placeholder="Product Name">
+<input type="text" id="category" placeholder="Category">
 <input type="number" id="cost" placeholder="Purchase Cost">
 <input type="number" id="price" placeholder="Selling Price">
 <input type="number" id="stock" placeholder="Stock Qty">
-<button onclick="addProduct()">Add</button>
+<input type="date" id="expiry">
+<input type="text" id="barcode" placeholder="Barcode">
+<button onclick="addProduct()">Add Product</button>
 <table>
-<thead><tr><th>Name</th><th>Cost</th><th>Price</th><th>Stock</th></tr></thead>
+<thead><tr><th>Name</th><th>Cat</th><th>Cost</th><th>Price</th><th>Stock</th><th>Expiry</th><th>Barcode</th></tr></thead>
 <tbody id="productTable"></tbody>
 </table>
 </div>
 
+<!-- Supplier -->
+<div class="card">
+<h3>🚚 Supplier Management</h3>
+<input type="text" id="sname" placeholder="Supplier Name">
+<input type="number" id="spayment" placeholder="Payment Amount">
+<button onclick="addSupplier()">Add Supplier Payment</button>
+<ul id="supplierList"></ul>
+</div>
+
 <!-- Billing -->
 <div class="card">
-<h3>🧾 Generate Bill</h3>
+<h3>🧾 Billing + GST</h3>
 <select id="billProduct"></select>
 <input type="number" id="qty" placeholder="Quantity">
+<select id="paymentMode">
+<option>Cash</option>
+<option>UPI</option>
+<option>Card</option>
+<option>Udhar</option>
+</select>
 <button onclick="addToBill()">Add</button>
 <table>
 <thead><tr><th>Product</th><th>Qty</th><th>Total</th></tr></thead>
 <tbody id="billTable"></tbody>
 </table>
-<h3>Total: ₹<span id="billTotal">0</span></h3>
-<button onclick="finalizeBill()">Finalize Bill</button>
+<h3>GST (18%) Included</h3>
+<h3>Total Bill: ₹<span id="billTotal">0</span></h3>
+<button onclick="finalizeBill()">Finalize</button>
 <button onclick="window.print()">Download PDF</button>
+</div>
+
+<!-- Expense -->
+<div class="card">
+<h3>💸 Expense Tracker</h3>
+<input type="text" id="expDesc" placeholder="Expense Description">
+<input type="number" id="expAmount" placeholder="Amount">
+<button onclick="addExpense()">Add Expense</button>
+<ul id="expenseList"></ul>
 </div>
 
 <!-- Analytics -->
 <div class="card">
-<h3>📊 Sales Analytics</h3>
+<h3>📊 Analytics</h3>
 <canvas id="salesChart"></canvas>
+</div>
+
+<!-- Backup -->
+<div class="card">
+<h3>💾 Backup / Restore</h3>
+<button onclick="backupData()">Download Backup</button>
+<input type="file" onchange="restoreData(event)">
 </div>
 
 </div>
 
 <script>
-// Firebase Config (Replace with your config)
-var firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-};
-firebase.initializeApp(firebaseConfig);
-var db = firebase.firestore();
-
-let products=[];
+let products=JSON.parse(localStorage.getItem('products'))||[];
+let sales=JSON.parse(localStorage.getItem('sales'))||[];
+let expenses=JSON.parse(localStorage.getItem('expenses'))||[];
+let suppliers=JSON.parse(localStorage.getItem('suppliers'))||[];
 let bill=[];
-let sales=[];
 
-function register(){
-let email=document.getElementById('email').value;
-let pass=document.getElementById('password').value;
-firebase.auth().createUserWithEmailAndPassword(email,pass);
+function save(){
+localStorage.setItem('products',JSON.stringify(products));
+localStorage.setItem('sales',JSON.stringify(sales));
+localStorage.setItem('expenses',JSON.stringify(expenses));
+localStorage.setItem('suppliers',JSON.stringify(suppliers));
 }
-
-function login(){
-let email=document.getElementById('email').value;
-let pass=document.getElementById('password').value;
-firebase.auth().signInWithEmailAndPassword(email,pass);
-}
-
-function logout(){ firebase.auth().signOut(); }
-
-firebase.auth().onAuthStateChanged(user=>{
-if(user){ loadData(); }
-});
 
 function addProduct(){
-let name=pname.value;
-let costVal=parseFloat(cost.value);
-let priceVal=parseFloat(price.value);
-let stockVal=parseInt(stock.value);
-if(!name||!costVal||!priceVal||!stockVal) return;
-db.collection("products").add({name,cost:costVal,price:priceVal,stock:stockVal});
+let p={
+name:pname.value,
+category:category.value,
+cost:+cost.value,
+price:+price.value,
+stock:+stock.value,
+expiry:expiry.value,
+barcode:barcode.value
+};
+products.push(p);
+save();
+renderProducts();
 }
 
-function loadData(){
-db.collection("products").onSnapshot(snapshot=>{
-products=[];
+function renderProducts(){
 productTable.innerHTML="";
 billProduct.innerHTML="";
 let low=0;
-snapshot.forEach(doc=>{
-let p=doc.data();
-p.id=doc.id;
-products.push(p);
+products.forEach((p,i)=>{
 if(p.stock<=5) low++;
-productTable.innerHTML+=`<tr><td>${p.name}</td><td>${p.cost}</td><td>${p.price}</td><td class='${p.stock<=5?"low":""}'>${p.stock}</td></tr>`;
-billProduct.add(new Option(p.name,p.id));
+productTable.innerHTML+=`<tr><td>${p.name}</td><td>${p.category}</td><td>${p.cost}</td><td>${p.price}</td><td class='${p.stock<=5?"low":""}'>${p.stock}</td><td>${p.expiry}</td><td>${p.barcode}</td></tr>`;
+billProduct.add(new Option(p.name,i));
 });
 lowStockCount.innerText=low;
-});
 }
 
 function addToBill(){
-let id=billProduct.value;
-let qtyVal=parseInt(qty.value);
-let product=products.find(p=>p.id===id);
-if(!qtyVal||qtyVal>product.stock) return alert("Not enough stock");
-bill.push({id,name:product.name,qty:qtyVal,total:product.price*qtyVal,cost:product.cost*qtyVal});
+let index=billProduct.value;
+let qtyVal=+qty.value;
+let p=products[index];
+if(qtyVal>p.stock) return alert("Low Stock");
+let total=p.price*qtyVal;
+let gst=total*0.18;
+bill.push({index,qty:qtyVal,total:total+gst,cost:p.cost*qtyVal});
 renderBill();
 }
 
@@ -155,10 +167,10 @@ function renderBill(){
 billTable.innerHTML="";
 let total=0;
 bill.forEach(b=>{
-billTable.innerHTML+=`<tr><td>${b.name}</td><td>${b.qty}</td><td>₹${b.total}</td></tr>`;
+billTable.innerHTML+=`<tr><td>${products[b.index].name}</td><td>${b.qty}</td><td>${b.total.toFixed(2)}</td></tr>`;
 total+=b.total;
 });
-billTotal.innerText=total;
+billTotal.innerText=total.toFixed(2);
 }
 
 function finalizeBill(){
@@ -166,39 +178,91 @@ let total=0,costTotal=0;
 bill.forEach(b=>{
 total+=b.total;
 costTotal+=b.cost;
-let product=products.find(p=>p.id===b.id);
-db.collection("products").doc(b.id).update({stock:product.stock-b.qty});
+products[b.index].stock-=b.qty;
 });
-db.collection("sales").add({date:new Date(),amount:total,cost:costTotal});
+sales.push({date:new Date().toLocaleDateString(),amount:total});
 bill=[];
+save();
+renderProducts();
 renderBill();
 updateDashboard();
 }
 
+function addExpense(){
+expenses.push({desc:expDesc.value,amount:+expAmount.value});
+save();
+renderExpenses();
+updateDashboard();
+}
+
+function renderExpenses(){
+expenseList.innerHTML="";
+expenses.forEach(e=>{
+expenseList.innerHTML+=`<li>${e.desc} - ₹${e.amount}</li>`;
+});
+}
+
+function addSupplier(){
+suppliers.push({name:sname.value,payment:+spayment.value});
+save();
+renderSuppliers();
+}
+
+function renderSuppliers(){
+supplierList.innerHTML="";
+suppliers.forEach(s=>{
+supplierList.innerHTML+=`<li>${s.name} - ₹${s.payment}</li>`;
+});
+}
+
 function updateDashboard(){
-db.collection("sales").onSnapshot(snapshot=>{
-let total=0,cost=0;
-sales=[];
-snapshot.forEach(doc=>{
-let s=doc.data();
-total+=s.amount;
-cost+=s.cost;
-sales.push(s);
-});
-totalSales.innerText=total;
-totalCost.innerText=cost;
-totalProfit.innerText=total-cost;
+let totalSalesVal=sales.reduce((a,b)=>a+b.amount,0);
+let totalExpenseVal=expenses.reduce((a,b)=>a+b.amount,0);
+let totalPurchaseVal=products.reduce((a,b)=>a+(b.cost*b.stock),0);
+totalSales.innerText=totalSalesVal.toFixed(2);
+totalExpense.innerText=totalExpenseVal.toFixed(2);
+totalPurchase.innerText=totalPurchaseVal.toFixed(2);
+netProfit.innerText=(totalSalesVal-totalExpenseVal).toFixed(2);
 updateChart();
-});
 }
 
 function updateChart(){
 let ctx=document.getElementById('salesChart');
-let labels=sales.map(s=>new Date(s.date.seconds*1000).toLocaleDateString());
-let data=sales.map(s=>s.amount);
-new Chart(ctx,{type:'bar',data:{labels:labels,datasets:[{label:'Sales',data:data}]}});
+new Chart(ctx,{type:'line',data:{labels:sales.map(s=>s.date),datasets:[{label:'Sales',data:sales.map(s=>s.amount)}]}});
 }
 
+function backupData(){
+let data={products,sales,expenses,suppliers};
+let blob=new Blob([JSON.stringify(data)],{type:"application/json"});
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="backup.json";
+a.click();
+}
+
+function restoreData(event){
+let file=event.target.files[0];
+let reader=new FileReader();
+reader.onload=function(e){
+let data=JSON.parse(e.target.result);
+products=data.products||[];
+sales=data.sales||[];
+expenses=data.expenses||[];
+suppliers=data.suppliers||[];
+save();
+renderProducts();
+renderExpenses();
+renderSuppliers();
+updateDashboard();
+};
+reader.readAsText(file);
+}
+
+function toggleDarkMode(){ document.body.classList.toggle("dark"); }
+
+renderProducts();
+renderExpenses();
+renderSuppliers();
 updateDashboard();
 </script>
 </body>
