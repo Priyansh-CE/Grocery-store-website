@@ -1,0 +1,150 @@
+import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ShoppingCart } from "lucide-react";
+import { motion } from "framer-motion";
+
+const productsData = [
+  { id: 1, name: "Fresh Apples", price: 120, image: "https://source.unsplash.com/400x300/?apples" },
+  { id: 2, name: "Bananas", price: 60, image: "https://source.unsplash.com/400x300/?bananas" },
+  { id: 3, name: "Tomatoes", price: 40, image: "https://source.unsplash.com/400x300/?tomatoes" },
+  { id: 4, name: "Milk", price: 55, image: "https://source.unsplash.com/400x300/?milk" },
+  { id: 5, name: "Bread", price: 35, image: "https://source.unsplash.com/400x300/?bread" },
+  { id: 6, name: "Rice (1kg)", price: 70, image: "https://source.unsplash.com/400x300/?rice" },
+];
+
+export default function GroceryStore() {
+  const [cart, setCart] = useState([]);
+  const [search, setSearch] = useState("");
+
+  const addToCart = (product) => {
+    setCart([...cart, product]);
+  };
+
+  const totalPrice = cart.reduce((acc, item) => acc + item.price, 0);
+
+  const filteredProducts = productsData.filter((product) =>
+    product.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <h1 className="text-3xl md:text-4xl font-bold">🛒 Fresh Grocery Store</h1>
+        <div className="flex gap-4 items-center w-full md:w-auto">
+          <Input
+            placeholder="Search products..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full md:w-64"
+          />
+          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl shadow">
+            <ShoppingCart size={20} />
+            <span className="font-semibold">₹{totalPrice}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Product Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {filteredProducts.map((product) => (
+          <motion.div
+            key={product.id}
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 200 }}
+          >
+            <Card className="rounded-2xl shadow-lg overflow-hidden">
+              <img
+                src={product.image}
+                alt={product.name}
+                className="h-40 w-full object-cover"
+              />
+              <CardContent className="p-4 flex flex-col gap-2">
+                <h2 className="text-lg font-semibold">{product.name}</h2>
+                <p className="text-gray-600">₹{product.price}</p>
+                <Button
+                  onClick={() => addToCart(product)}
+                  className="mt-2 rounded-2xl"
+                >
+                  Add to Cart
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Footer */
+      <div className="mt-12 text-center text-gray-500 text-sm">
+        © 2026 Fresh Grocery Store | Built with ❤️
+      </div>
+    </div>
+  );
+}
+
+/* ================= GITHUB SETUP FILES ================= */
+
+/*
+1️⃣ package.json (Create this file in root folder)
+-----------------------------------------------
+{
+  "name": "grocery-store",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "framer-motion": "^11.0.0",
+    "lucide-react": "^0.378.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.0",
+    "vite": "^5.0.0"
+  }
+}
+
+2️⃣ vite.config.js
+-----------------------------------------------
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+})
+
+3️⃣ index.html
+-----------------------------------------------
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fresh Grocery Store</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+
+4️⃣ src/main.jsx
+-----------------------------------------------
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import GroceryStore from './GroceryStore'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <GroceryStore />
+  </React.StrictMode>,
+)
+
+*/
