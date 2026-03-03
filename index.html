@@ -3,40 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Advanced Grocery Store Management System</title>
+<title>Ultimate Grocery Store Management System</title>
 <style>
 body{font-family:Arial;margin:0;background:#eef2f7}
-header{background:#0d47a1;color:#fff;padding:15px;text-align:center}
-.container{max-width:1200px;margin:auto;padding:20px}
+header{background:#004d40;color:#fff;padding:15px;text-align:center}
+.container{max-width:1300px;margin:auto;padding:20px}
 .card{background:#fff;padding:15px;border-radius:10px;margin-bottom:15px;box-shadow:0 3px 10px rgba(0,0,0,0.1)}
 h3{margin-top:0}
 input,select,button{padding:8px;margin:5px}
-button{background:#0d47a1;color:#fff;border:none;border-radius:5px;cursor:pointer}
-button:hover{background:#08306b}
+button{background:#004d40;color:#fff;border:none;border-radius:5px;cursor:pointer}
+button:hover{background:#00251a}
 table{width:100%;border-collapse:collapse;margin-top:10px}
 th,td{border:1px solid #ddd;padding:8px;text-align:center}
-th{background:#e3f2fd}
+th{background:#e0f2f1}
 .flex{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px}
 .stat{background:#fff;padding:15px;border-radius:10px;text-align:center;box-shadow:0 3px 8px rgba(0,0,0,0.1)}
-.hidden{display:none}
 .small-btn{padding:4px 7px;font-size:12px}
+.alert{color:red;font-weight:bold}
 </style>
 </head>
 <body>
 
 <header>
-<h2>🛒 Advanced Grocery Store Management</h2>
+<h2>🛒 Ultimate Grocery Store Management</h2>
 </header>
 
 <div class="container">
 
 <!-- Dashboard -->
 <div class="dashboard">
-<div class="stat">Total Customers<br><strong id="totalCustomers">0</strong></div>
-<div class="stat">Total Udhar<br><strong>₹<span id="totalCredit">0</span></strong></div>
-<div class="stat">Total Received<br><strong>₹<span id="totalDebit">0</span></strong></div>
-<div class="stat">Net Balance<br><strong>₹<span id="netBalance">0</span></strong></div>
+<div class="stat">Customers<br><strong id="totalCustomers">0</strong></div>
+<div class="stat">Total Udhar<br>₹<strong id="totalCredit">0</strong></div>
+<div class="stat">Total Received<br>₹<strong id="totalDebit">0</strong></div>
+<div class="stat">Net Balance<br>₹<strong id="netBalance">0</strong></div>
+<div class="stat">Low Stock Items<br><strong id="lowStock">0</strong></div>
 </div>
 
 <!-- Customer Section -->
@@ -44,10 +45,11 @@ th{background:#e3f2fd}
 <h3>Customer Management</h3>
 <div class="flex">
 <input type="text" id="customerName" placeholder="Customer Name">
-<button onclick="addCustomer()">Add Customer</button>
-<select id="customerSelect"></select>
+<button onclick="addCustomer()">Add</button>
+<select id="customerSelect" onchange="showCustomerBalance()"></select>
 <button onclick="deleteCustomer()" class="small-btn">Delete</button>
 </div>
+<div id="customerBalance"></div>
 </div>
 
 <!-- Transaction Section -->
@@ -76,24 +78,20 @@ th{background:#e3f2fd}
 </div>
 <table>
 <thead>
-<tr><th>Product</th><th>Qty</th><th>Price</th><th>Action</th></tr>
+<tr><th>Product</th><th>Qty</th><th>Price</th><th>Status</th><th>Action</th></tr>
 </thead>
 <tbody id="productTable"></tbody>
 </table>
 </div>
 
-<!-- Records Section -->
+<!-- Reports Section -->
 <div class="card">
-<h3>Transaction Records</h3>
-<input type="text" id="search" placeholder="Search Customer" onkeyup="renderTransactions()">
-<table>
-<thead>
-<tr><th>Date</th><th>Customer</th><th>Type</th><th>Amount</th><th>Note</th><th>Action</th></tr>
-</thead>
-<tbody id="records"></tbody>
-</table>
-<button onclick="printReport()">Print Report</button>
+<h3>Reports</h3>
+<button onclick="monthlyReport()">Monthly Report</button>
 <button onclick="exportCSV()">Download CSV</button>
+<button onclick="backupData()">Backup Data</button>
+<input type="file" onchange="restoreData(event)">
+<div id="reportResult"></div>
 </div>
 
 </div>
@@ -111,7 +109,6 @@ localStorage.setItem('products',JSON.stringify(products));
 
 function init(){
 updateCustomerUI();
-renderTransactions();
 renderProducts();
 updateDashboard();
 }
@@ -132,7 +129,6 @@ customers=customers.filter(c=>c!==name);
 transactions=transactions.filter(t=>t.customer!==name);
 saveData();
 updateCustomerUI();
-renderTransactions();
 updateDashboard();
 }
 
@@ -154,35 +150,22 @@ let type=document.getElementById('type').value;
 let amount=parseFloat(document.getElementById('amount').value);
 let note=document.getElementById('note').value;
 if(!customer||!amount) return;
-transactions.push({date:new Date().toLocaleDateString(),customer,type,amount,note});
+transactions.push({date:new Date(),customer,type,amount,note});
 document.getElementById('amount').value="";
 document.getElementById('note').value="";
 saveData();
-renderTransactions();
 updateDashboard();
+showCustomerBalance();
 }
 
-function renderTransactions(){
-let tbody=document.getElementById('records');
-let search=document.getElementById('search').value.toLowerCase();
-tbody.innerHTML="";
-transactions.filter(t=>t.customer.toLowerCase().includes(search)).forEach((t,i)=>{
-tbody.innerHTML+=`<tr>
-<td>${t.date}</td>
-<td>${t.customer}</td>
-<td>${t.type}</td>
-<td>₹${t.amount}</td>
-<td>${t.note}</td>
-<td><button class='small-btn' onclick='deleteTransaction(${i})'>Delete</button></td>
-</tr>`;
+function showCustomerBalance(){
+let name=document.getElementById('customerSelect').value;
+let balance=0;
+transactions.filter(t=>t.customer===name).forEach(t=>{
+if(t.type==='credit') balance+=t.amount;
+else balance-=t.amount;
 });
-}
-
-function deleteTransaction(i){
-transactions.splice(i,1);
-saveData();
-renderTransactions();
-updateDashboard();
+document.getElementById('customerBalance').innerHTML="Balance: ₹"+balance;
 }
 
 function updateDashboard(){
@@ -194,6 +177,8 @@ else debit+=t.amount;
 document.getElementById('totalCredit').innerText=credit;
 document.getElementById('totalDebit').innerText=debit;
 document.getElementById('netBalance').innerText=credit-debit;
+let low=products.filter(p=>p.qty<5).length;
+document.getElementById('lowStock').innerText=low;
 }
 
 function addProduct(){
@@ -204,16 +189,19 @@ if(!name||!qty||!price) return;
 products.push({name,qty,price});
 saveData();
 renderProducts();
+updateDashboard();
 }
 
 function renderProducts(){
 let tbody=document.getElementById('productTable');
 tbody.innerHTML="";
 products.forEach((p,i)=>{
+let status=p.qty<5?"<span class='alert'>Low Stock</span>":"OK";
 tbody.innerHTML+=`<tr>
 <td>${p.name}</td>
 <td>${p.qty}</td>
 <td>₹${p.price}</td>
+<td>${status}</td>
 <td><button class='small-btn' onclick='deleteProduct(${i})'>Delete</button></td>
 </tr>`;
 });
@@ -223,12 +211,21 @@ function deleteProduct(i){
 products.splice(i,1);
 saveData();
 renderProducts();
+updateDashboard();
+}
+
+function monthlyReport(){
+let month=new Date().getMonth();
+let monthly=transactions.filter(t=>new Date(t.date).getMonth()===month);
+let total=0;
+monthly.forEach(t=>{if(t.type==='credit') total+=t.amount;});
+document.getElementById('reportResult').innerHTML="This Month Total Udhar: ₹"+total;
 }
 
 function exportCSV(){
 let csv="Date,Customer,Type,Amount,Note\n";
 transactions.forEach(t=>{
-csv+=`${t.date},${t.customer},${t.type},${t.amount},${t.note}\n`;
+csv+=`${new Date(t.date).toLocaleDateString()},${t.customer},${t.type},${t.amount},${t.note}\n`;
 });
 let blob=new Blob([csv],{type:'text/csv'});
 let link=document.createElement('a');
@@ -237,8 +234,27 @@ link.download="grocery_report.csv";
 link.click();
 }
 
-function printReport(){
-window.print();
+function backupData(){
+let data={customers,transactions,products};
+let blob=new Blob([JSON.stringify(data)],{type:'application/json'});
+let link=document.createElement('a');
+link.href=URL.createObjectURL(blob);
+link.download="backup.json";
+link.click();
+}
+
+function restoreData(event){
+let file=event.target.files[0];
+let reader=new FileReader();
+reader.onload=function(){
+let data=JSON.parse(reader.result);
+customers=data.customers||[];
+transactions=data.transactions||[];
+products=data.products||[];
+saveData();
+init();
+};
+reader.readAsText(file);
 }
 
 init();
