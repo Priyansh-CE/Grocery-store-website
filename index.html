@@ -1,116 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fresh Grocery Store</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-        }
-        header {
-            background-color: #2e7d32;
-            color: white;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .container {
-            padding: 20px;
-        }
-        .products {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-        .card {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .card img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-        button {
-            background-color: #2e7d32;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            margin-top: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #1b5e20;
-        }
-        footer {
-            text-align: center;
-            padding: 15px;
-            background: #ddd;
-            margin-top: 20px;
-        }
-        .cart {
-            font-weight: bold;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grocery Store हिसाब App</title>
+<style>
+body{font-family:Arial;margin:0;background:#f2f2f2}
+header{background:#2e7d32;color:#fff;padding:15px;text-align:center}
+.container{padding:20px}
+input,select,button{padding:8px;margin:5px}
+button{background:#2e7d32;color:#fff;border:none;cursor:pointer}
+button:hover{background:#1b5e20}
+table{width:100%;background:#fff;border-collapse:collapse;margin-top:15px}
+th,td{padding:10px;border:1px solid #ddd;text-align:center}
+.card{background:#fff;padding:15px;border-radius:8px;margin-bottom:15px}
+.balance{font-size:18px;font-weight:bold;margin-top:10px}
+</style>
 </head>
 <body>
 
 <header>
-    <h2>🛒 Fresh Grocery Store</h2>
-    <div class="cart">Cart Total: ₹<span id="total">0</span></div>
+<h2>🛒 Grocery Store Hisab Book</h2>
 </header>
 
 <div class="container">
-    <div class="products">
-        <div class="card">
-            <img src="https://source.unsplash.com/400x300/?apples" alt="Apples">
-            <h3>Fresh Apples</h3>
-            <p>₹120</p>
-            <button onclick="addToCart(120)">Add to Cart</button>
-        </div>
 
-        <div class="card">
-            <img src="https://source.unsplash.com/400x300/?bananas" alt="Bananas">
-            <h3>Bananas</h3>
-            <p>₹60</p>
-            <button onclick="addToCart(60)">Add to Cart</button>
-        </div>
-
-        <div class="card">
-            <img src="https://source.unsplash.com/400x300/?tomatoes" alt="Tomatoes">
-            <h3>Tomatoes</h3>
-            <p>₹40</p>
-            <button onclick="addToCart(40)">Add to Cart</button>
-        </div>
-
-        <div class="card">
-            <img src="https://source.unsplash.com/400x300/?milk" alt="Milk">
-            <h3>Milk</h3>
-            <p>₹55</p>
-            <button onclick="addToCart(55)">Add to Cart</button>
-        </div>
-    </div>
+<div class="card">
+<h3>Add Customer</h3>
+<input type="text" id="customerName" placeholder="Customer Name">
+<button onclick="addCustomer()">Add Customer</button>
 </div>
 
-<footer>
-    © 2026 Fresh Grocery Store | All Rights Reserved
-</footer>
+<div class="card">
+<h3>Add Transaction</h3>
+<select id="customerSelect"></select>
+<select id="type">
+<option value="credit">Udhar (Customer Dena Hai)</option>
+<option value="debit">Payment Mila</option>
+</select>
+<input type="number" id="amount" placeholder="Amount">
+<button onclick="addTransaction()">Add Entry</button>
+</div>
+
+<div class="card">
+<h3>Hisab Details</h3>
+<div class="balance">Total Balance: ₹<span id="totalBalance">0</span></div>
+<table>
+<thead>
+<tr>
+<th>Customer</th>
+<th>Type</th>
+<th>Amount</th>
+</tr>
+</thead>
+<tbody id="records"></tbody>
+</table>
+</div>
+
+</div>
 
 <script>
-    let total = 0;
-    function addToCart(price) {
-        total += price;
-        document.getElementById('total').innerText = total;
-    }
+let customers = [];
+let transactions = [];
+
+function addCustomer(){
+const name = document.getElementById('customerName').value.trim();
+if(name==="") return;
+customers.push(name);
+document.getElementById('customerName').value="";
+updateCustomerSelect();
+}
+
+function updateCustomerSelect(){
+const select = document.getElementById('customerSelect');
+select.innerHTML="";
+customers.forEach(c=>{
+let option=document.createElement('option');
+option.value=c;
+option.text=c;
+select.appendChild(option);
+});
+}
+
+function addTransaction(){
+const customer=document.getElementById('customerSelect').value;
+const type=document.getElementById('type').value;
+const amount=parseFloat(document.getElementById('amount').value);
+if(!customer || !amount) return;
+transactions.push({customer,type,amount});
+document.getElementById('amount').value="";
+renderTransactions();
+}
+
+function renderTransactions(){
+const tbody=document.getElementById('records');
+tbody.innerHTML="";
+let balance=0;
+transactions.forEach(t=>{
+let row=`<tr>
+<td>${t.customer}</td>
+<td>${t.type}</td>
+<td>₹${t.amount}</td>
+</tr>`;
+tbody.innerHTML+=row;
+if(t.type==='credit') balance+=t.amount;
+else balance-=t.amount;
+});
+document.getElementById('totalBalance').innerText=balance;
+}
 </script>
 
 </body>
