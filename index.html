@@ -1,85 +1,117 @@
-import React, { useState } from "react";
-import { ShoppingCart } from "lucide-react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fresh Grocery Store</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #2e7d32;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        button {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin-top: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1b5e20;
+        }
+        footer {
+            text-align: center;
+            padding: 15px;
+            background: #ddd;
+            margin-top: 20px;
+        }
+        .cart {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
 
-const productsData = [
-  { id: 1, name: "Fresh Apples", price: 120, image: "https://source.unsplash.com/400x300/?apples" },
-  { id: 2, name: "Bananas", price: 60, image: "https://source.unsplash.com/400x300/?bananas" },
-  { id: 3, name: "Tomatoes", price: 40, image: "https://source.unsplash.com/400x300/?tomatoes" },
-  { id: 4, name: "Milk", price: 55, image: "https://source.unsplash.com/400x300/?milk" },
-  { id: 5, name: "Bread", price: 35, image: "https://source.unsplash.com/400x300/?bread" },
-  { id: 6, name: "Rice (1kg)", price: 70, image: "https://source.unsplash.com/400x300/?rice" },
-];
+<header>
+    <h2>🛒 Fresh Grocery Store</h2>
+    <div class="cart">Cart Total: ₹<span id="total">0</span></div>
+</header>
 
-export default function GroceryStore() {
-  const [cart, setCart] = useState([]);
-  const [search, setSearch] = useState("");
-
-  const addToCart = (product) => {
-    setCart([...cart, product]);
-  };
-
-  const totalPrice = cart.reduce((acc, item) => acc + item.price, 0);
-
-  const filteredProducts = productsData.filter((product) =>
-    product.name.toLowerCase().includes(search.toLowerCase())
-  );
-
-  return (
-    <div style={{ padding: "20px", fontFamily: "Arial" }}>
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-        <h1>🛒 Fresh Grocery Store</h1>
-
-        <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ padding: "8px", width: "200px" }}
-          />
-
-          <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-            <ShoppingCart size={20} />
-            <strong>₹{totalPrice}</strong>
-          </div>
+<div class="container">
+    <div class="products">
+        <div class="card">
+            <img src="https://source.unsplash.com/400x300/?apples" alt="Apples">
+            <h3>Fresh Apples</h3>
+            <p>₹120</p>
+            <button onclick="addToCart(120)">Add to Cart</button>
         </div>
-      </div>
 
-      {/* Product Grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-          gap: "20px",
-        }}
-      >
-        {filteredProducts.map((product) => (
-          <div
-            key={product.id}
-            style={{ border: "1px solid #ddd", padding: "10px", borderRadius: "10px" }}
-          >
-            <img
-              src={product.image}
-              alt={product.name}
-              style={{ width: "100%", height: "150px", objectFit: "cover" }}
-            />
-            <h3>{product.name}</h3>
-            <p>₹{product.price}</p>
-            <button
-              onClick={() => addToCart(product)}
-              style={{ padding: "8px", cursor: "pointer" }}
-            >
-              Add to Cart
-            </button>
-          </div>
-        ))}
-      </div>
+        <div class="card">
+            <img src="https://source.unsplash.com/400x300/?bananas" alt="Bananas">
+            <h3>Bananas</h3>
+            <p>₹60</p>
+            <button onclick="addToCart(60)">Add to Cart</button>
+        </div>
 
-      {/* Footer */}
-      <div style={{ marginTop: "40px", textAlign: "center", color: "gray" }}>
-        © 2026 Fresh Grocery Store | Built with ❤️
-      </div>
+        <div class="card">
+            <img src="https://source.unsplash.com/400x300/?tomatoes" alt="Tomatoes">
+            <h3>Tomatoes</h3>
+            <p>₹40</p>
+            <button onclick="addToCart(40)">Add to Cart</button>
+        </div>
+
+        <div class="card">
+            <img src="https://source.unsplash.com/400x300/?milk" alt="Milk">
+            <h3>Milk</h3>
+            <p>₹55</p>
+            <button onclick="addToCart(55)">Add to Cart</button>
+        </div>
     </div>
-  );
-}
+</div>
+
+<footer>
+    © 2026 Fresh Grocery Store | All Rights Reserved
+</footer>
+
+<script>
+    let total = 0;
+    function addToCart(price) {
+        total += price;
+        document.getElementById('total').innerText = total;
+    }
+</script>
+
+</body>
+</html>
