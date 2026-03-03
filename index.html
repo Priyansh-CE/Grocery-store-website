@@ -3,57 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Complete Grocery Hisab Management</title>
+<title>Advanced Grocery Store Management System</title>
 <style>
-body{font-family:Arial;margin:0;background:#f4f6f9}
-header{background:#1b5e20;color:#fff;padding:15px;text-align:center}
-.container{padding:20px;max-width:1100px;margin:auto}
-.card{background:#fff;padding:15px;border-radius:10px;margin-bottom:15px;box-shadow:0 3px 8px rgba(0,0,0,0.1)}
+body{font-family:Arial;margin:0;background:#eef2f7}
+header{background:#0d47a1;color:#fff;padding:15px;text-align:center}
+.container{max-width:1200px;margin:auto;padding:20px}
+.card{background:#fff;padding:15px;border-radius:10px;margin-bottom:15px;box-shadow:0 3px 10px rgba(0,0,0,0.1)}
+h3{margin-top:0}
 input,select,button{padding:8px;margin:5px}
-button{background:#1b5e20;color:#fff;border:none;cursor:pointer;border-radius:5px}
-button:hover{background:#0d3d14}
+button{background:#0d47a1;color:#fff;border:none;border-radius:5px;cursor:pointer}
+button:hover{background:#08306b}
 table{width:100%;border-collapse:collapse;margin-top:10px}
 th,td{border:1px solid #ddd;padding:8px;text-align:center}
-th{background:#e8f5e9}
-.balance{font-size:18px;font-weight:bold}
+th{background:#e3f2fd}
 .flex{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.small-btn{padding:5px 8px;font-size:12px}
-.login-box{max-width:300px;margin:100px auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,0.2)}
+.dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px}
+.stat{background:#fff;padding:15px;border-radius:10px;text-align:center;box-shadow:0 3px 8px rgba(0,0,0,0.1)}
 .hidden{display:none}
+.small-btn{padding:4px 7px;font-size:12px}
 </style>
 </head>
 <body>
 
-<div id="loginSection" class="login-box">
-<h3>Store Login</h3>
-<input type="password" id="password" placeholder="Enter Password">
-<button onclick="login()">Login</button>
-</div>
-
-<div id="appSection" class="hidden">
 <header>
-<h2>🛒 Grocery Store Complete Hisab System</h2>
+<h2>🛒 Advanced Grocery Store Management</h2>
 </header>
 
 <div class="container">
 
+<!-- Dashboard -->
+<div class="dashboard">
+<div class="stat">Total Customers<br><strong id="totalCustomers">0</strong></div>
+<div class="stat">Total Udhar<br><strong>₹<span id="totalCredit">0</span></strong></div>
+<div class="stat">Total Received<br><strong>₹<span id="totalDebit">0</span></strong></div>
+<div class="stat">Net Balance<br><strong>₹<span id="netBalance">0</span></strong></div>
+</div>
+
+<!-- Customer Section -->
 <div class="card">
-<h3>Add Customer</h3>
+<h3>Customer Management</h3>
 <div class="flex">
 <input type="text" id="customerName" placeholder="Customer Name">
-<button onclick="addCustomer()">Add</button>
-<select id="customerFilter" onchange="filterCustomer()"></select>
-<button onclick="deleteCustomer()" class="small-btn">Delete Customer</button>
+<button onclick="addCustomer()">Add Customer</button>
+<select id="customerSelect"></select>
+<button onclick="deleteCustomer()" class="small-btn">Delete</button>
 </div>
 </div>
 
+<!-- Transaction Section -->
 <div class="card">
 <h3>Add Transaction</h3>
 <div class="flex">
-<select id="customerSelect"></select>
+<select id="transCustomer"></select>
 <select id="type">
-<option value="credit">Udhar (Customer Dena Hai)</option>
-<option value="debit">Payment Mila</option>
+<option value="credit">Udhar</option>
+<option value="debit">Payment</option>
 </select>
 <input type="number" id="amount" placeholder="Amount">
 <input type="text" id="note" placeholder="Note">
@@ -61,50 +65,55 @@ th{background:#e8f5e9}
 </div>
 </div>
 
+<!-- Inventory Section -->
 <div class="card">
-<h3>Records</h3>
-<div class="balance">Total Balance: ₹<span id="totalBalance">0</span></div>
+<h3>Stock Management</h3>
+<div class="flex">
+<input type="text" id="productName" placeholder="Product Name">
+<input type="number" id="productQty" placeholder="Quantity">
+<input type="number" id="productPrice" placeholder="Price">
+<button onclick="addProduct()">Add Product</button>
+</div>
+<table>
+<thead>
+<tr><th>Product</th><th>Qty</th><th>Price</th><th>Action</th></tr>
+</thead>
+<tbody id="productTable"></tbody>
+</table>
+</div>
+
+<!-- Records Section -->
+<div class="card">
+<h3>Transaction Records</h3>
 <input type="text" id="search" placeholder="Search Customer" onkeyup="renderTransactions()">
 <table>
 <thead>
-<tr>
-<th>Date</th>
-<th>Customer</th>
-<th>Type</th>
-<th>Amount</th>
-<th>Note</th>
-<th>Action</th>
-</tr>
+<tr><th>Date</th><th>Customer</th><th>Type</th><th>Amount</th><th>Note</th><th>Action</th></tr>
 </thead>
 <tbody id="records"></tbody>
 </table>
-<button onclick="exportCSV()">Download Excel (CSV)</button>
-<button onclick="clearAll()" style="background:red">Clear All Data</button>
+<button onclick="printReport()">Print Report</button>
+<button onclick="exportCSV()">Download CSV</button>
 </div>
 
-</div>
 </div>
 
 <script>
-let customers = JSON.parse(localStorage.getItem('customers')) || [];
-let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+let customers=JSON.parse(localStorage.getItem('customers'))||[];
+let transactions=JSON.parse(localStorage.getItem('transactions'))||[];
+let products=JSON.parse(localStorage.getItem('products'))||[];
 
-function login(){
-if(document.getElementById('password').value === "1234"){
-document.getElementById('loginSection').classList.add('hidden');
-document.getElementById('appSection').classList.remove('hidden');
-init();
-}else{alert("Wrong Password");}
+function saveData(){
+localStorage.setItem('customers',JSON.stringify(customers));
+localStorage.setItem('transactions',JSON.stringify(transactions));
+localStorage.setItem('products',JSON.stringify(products));
 }
 
 function init(){
-updateCustomerSelect();
+updateCustomerUI();
 renderTransactions();
-}
-
-function saveData(){
-localStorage.setItem('customers', JSON.stringify(customers));
-localStorage.setItem('transactions', JSON.stringify(transactions));
+renderProducts();
+updateDashboard();
 }
 
 function addCustomer(){
@@ -113,69 +122,107 @@ if(!name) return;
 customers.push(name);
 document.getElementById('customerName').value="";
 saveData();
-updateCustomerSelect();
+updateCustomerUI();
+updateDashboard();
 }
 
 function deleteCustomer(){
-let selected=document.getElementById('customerFilter').value;
-customers=customers.filter(c=>c!==selected);
-transactions=transactions.filter(t=>t.customer!==selected);
+let name=document.getElementById('customerSelect').value;
+customers=customers.filter(c=>c!==name);
+transactions=transactions.filter(t=>t.customer!==name);
 saveData();
-updateCustomerSelect();
+updateCustomerUI();
 renderTransactions();
+updateDashboard();
 }
 
-function updateCustomerSelect(){
+function updateCustomerUI(){
 let select=document.getElementById('customerSelect');
-let filter=document.getElementById('customerFilter');
+let trans=document.getElementById('transCustomer');
 select.innerHTML="";
-filter.innerHTML="";
+trans.innerHTML="";
 customers.forEach(c=>{
-let opt1=new Option(c,c);
-let opt2=new Option(c,c);
-select.add(opt1);
-filter.add(opt2);
+select.add(new Option(c,c));
+trans.add(new Option(c,c));
 });
+document.getElementById('totalCustomers').innerText=customers.length;
 }
 
 function addTransaction(){
-let customer=document.getElementById('customerSelect').value;
+let customer=document.getElementById('transCustomer').value;
 let type=document.getElementById('type').value;
 let amount=parseFloat(document.getElementById('amount').value);
 let note=document.getElementById('note').value;
-if(!customer || !amount) return;
+if(!customer||!amount) return;
 transactions.push({date:new Date().toLocaleDateString(),customer,type,amount,note});
 document.getElementById('amount').value="";
 document.getElementById('note').value="";
 saveData();
 renderTransactions();
+updateDashboard();
 }
 
 function renderTransactions(){
 let tbody=document.getElementById('records');
 let search=document.getElementById('search').value.toLowerCase();
 tbody.innerHTML="";
-let balance=0;
-transactions.filter(t=>t.customer.toLowerCase().includes(search)).forEach((t,index)=>{
-let row=`<tr>
+transactions.filter(t=>t.customer.toLowerCase().includes(search)).forEach((t,i)=>{
+tbody.innerHTML+=`<tr>
 <td>${t.date}</td>
 <td>${t.customer}</td>
 <td>${t.type}</td>
 <td>₹${t.amount}</td>
 <td>${t.note}</td>
-<td><button class='small-btn' onclick='deleteTransaction(${index})'>Delete</button></td>
+<td><button class='small-btn' onclick='deleteTransaction(${i})'>Delete</button></td>
 </tr>`;
-tbody.innerHTML+=row;
-if(t.type==='credit') balance+=t.amount;
-else balance-=t.amount;
 });
-document.getElementById('totalBalance').innerText=balance;
 }
 
-function deleteTransaction(index){
-transactions.splice(index,1);
+function deleteTransaction(i){
+transactions.splice(i,1);
 saveData();
 renderTransactions();
+updateDashboard();
+}
+
+function updateDashboard(){
+let credit=0,debit=0;
+transactions.forEach(t=>{
+if(t.type==='credit') credit+=t.amount;
+else debit+=t.amount;
+});
+document.getElementById('totalCredit').innerText=credit;
+document.getElementById('totalDebit').innerText=debit;
+document.getElementById('netBalance').innerText=credit-debit;
+}
+
+function addProduct(){
+let name=document.getElementById('productName').value;
+let qty=parseInt(document.getElementById('productQty').value);
+let price=parseFloat(document.getElementById('productPrice').value);
+if(!name||!qty||!price) return;
+products.push({name,qty,price});
+saveData();
+renderProducts();
+}
+
+function renderProducts(){
+let tbody=document.getElementById('productTable');
+tbody.innerHTML="";
+products.forEach((p,i)=>{
+tbody.innerHTML+=`<tr>
+<td>${p.name}</td>
+<td>${p.qty}</td>
+<td>₹${p.price}</td>
+<td><button class='small-btn' onclick='deleteProduct(${i})'>Delete</button></td>
+</tr>`;
+});
+}
+
+function deleteProduct(i){
+products.splice(i,1);
+saveData();
+renderProducts();
 }
 
 function exportCSV(){
@@ -186,16 +233,15 @@ csv+=`${t.date},${t.customer},${t.type},${t.amount},${t.note}\n`;
 let blob=new Blob([csv],{type:'text/csv'});
 let link=document.createElement('a');
 link.href=URL.createObjectURL(blob);
-link.download="hisab.csv";
+link.download="grocery_report.csv";
 link.click();
 }
 
-function clearAll(){
-if(confirm("Are you sure?")){
-localStorage.clear();
-location.reload();
+function printReport(){
+window.print();
 }
-}
+
+init();
 </script>
 
 </body>
